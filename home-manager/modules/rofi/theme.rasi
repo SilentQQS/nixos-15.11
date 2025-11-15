@@ -1,0 +1,93 @@
+* {
+    background:rgba(0, 0, 0, 0.18);
+    background-alt:rgba(38, 38, 38, 0.28);
+    foreground:rgb(255, 255, 255);
+    selected:rgba(255, 255, 255, 0.57);
+    active:rgb(255, 255, 255);
+    urgent:rgb(255, 255, 255);
+}
+element-text, element-icon, {
+    background-color: inherit;
+    text-color: inherit;
+    border-radius: 20px;
+    highlight: none; 
+}
+
+mode-switcher {
+  background-color: rgba(0, 0, 0, 0.35); 
+  text-color : @foreground;
+  border-radius: 0px;
+  border: none;
+  padding: 0px;
+}
+
+window {
+    border: 3px;
+    background-color: @background;
+    border-radius: 20px;
+    padding: 0px 20px 0px 0px;
+}
+
+mainbox {
+    background-color: @background;
+}
+
+inputbar {
+    children: [prompt, entry];
+    background-color: @background;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+prompt {
+    enabled: false;
+    background-color: @selected;
+    padding: 5px;
+    text-color: @background;
+    border-radius: 5px;
+    text-align: center;
+    margin: 0px;
+}
+
+textbox-prompt-colon {
+    expand: false;
+    str: ":";
+}
+
+entry {
+    padding: 0px 10px 8px 10px;  
+    margin: 15px 0px 0px 15px;
+    text-color: @foreground;
+    background-color: @background;
+    line-height: 30px;   
+    cursor-width: 11;
+}
+
+listview {
+    border: 0px;
+    padding: 4px 0px 13px;
+    margin: 0px 0px 0px 20px;
+    columns: 1;
+    background-color: @background;
+    fixed-height: false;
+    lines: 30;
+    border-radius: 0px;
+}
+
+element {
+    padding: 5px;
+    border-radius: 15px;
+    background-color: @background;
+    text-color: @foreground;
+}
+
+element-icon {
+    enabled: true;
+    size: 10px;
+}
+
+element selected {
+    background-color: @selected;
+    border-radius: 15px;
+    text-color:rgb(0, 0, 0);
+}

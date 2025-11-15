@@ -1,0 +1,143 @@
+* {
+  all: unset; // Unsets everything so you can style everything from scratch
+}
+
+$background: #000000;
+$foreground: #ffffff;
+
+$black: #000000;
+$gray: #565F89;
+$red: #F7768E;
+$green: #73DACA;
+$yellow: #E0AF68;
+$blue: #7AA2F7;
+$magenta: #BB9AF7;
+$cyan: #00ccff;
+$white: $foreground;
+
+// Global Styles
+.bar {
+  border-radius: 0px;
+  background-color: $black;
+  color: $white;
+  padding: 0px;
+}
+
+.workspaces button:hover {
+  color: $foreground;
+  color: $cyan;
+}
+
+.workspaces label {
+  font-family: "FiraCode Nerd Font";
+  font-weight: bold;
+  font-size: 1.3em;
+}
+
+.workspaces button:focus {
+  background-color: $gray;
+  color: $cyan;
+  box-shadow: inset 0 -3px #ffffff;
+}
+
+// Calendar
+.cal-box {
+  background-color: $black;
+  font-family: Comic Mono;
+  font-size: 1.5em;
+  font-weight: bold;
+  .cal-inner-box {
+      padding: 1rem 1rem .2rem;
+      background-color: $black;
+      .cal {
+          &.highlight {
+              padding: 10rem;
+          }
+          padding: .8rem .25rem 0rem;
+          margin-left: 10px;
+      }
+  }
+}
+
+calendar:selected {
+  color: $blue;
+}
+
+calendar.header {
+  color: $blue;
+  font-weight: bold;
+}
+
+calendar.button {
+  color: $magenta;
+}
+
+calendar.highlight {
+  color: $magenta;
+  font-weight: bold;
+}
+
+calendar:indeterminate {
+  color: $gray;
+}
+
+.time {
+  font-family: "FiraCode Nerd Font";
+  font-size: 1.5em;
+  font-weight: bold;
+  color: $foreground;
+  padding: 0 5px;
+}
+
+.time-separator {
+  margin: 0 0rem; 
+}
+
+.volume-container {
+    padding: 0 10px;
+    background-color: #333;
+    border-radius: 10px;
+    color: #eee;
+}
+
+.volume-level {
+    font-weight: bold;
+}
+
+.bribar trough {
+  all: unset;
+  background-color: $white;
+  font-size: 1.5em;
+  border-radius: 10px;
+  min-height: 5px;
+  min-width: 50px;
+  }
+
+.bribar highlight {
+  all: unset;
+  background-color: $cyan;
+}
+
+.bat{
+  font-family: "FiraCode Nerd Font";
+  font-size: 1.5em;
+  padding-right: .5rem;
+  margin-left: .8rem;
+  color: $blue;
+}
+
+.wifi-icon {
+  font-family: "FiraCode Nerd Font";
+  font-size: 1.3em;
+  color: #61afef; // синий
+  margin-right: .4rem;
+}
+
+.kb-layout {
+  font-family: "FiraCode Nerd Font"; 
+  font-size: 1.1em;
+  font-weight: bold;
+  padding: 0 0.5rem;
+}
+
+// widgets

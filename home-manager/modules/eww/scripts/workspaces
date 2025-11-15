@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Скрипт для eww: отслеживание рабочих пространств в Hyprland
+
+export PATH=$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH
+
+EWW_BIN="eww"
+
+eww_update() {
+    local new_workspaces
+    new_workspaces=$("$EWW_BIN" get workspaces | jaq -c --arg value "$1" "$2")
+    "$EWW_BIN" update workspaces "$new_workspaces"
+}
+
+update_occupied_workspaces() {
+    local occupied_workspaces
+    mapfile -t occupied_workspaces < <(hyprctl workspaces -j 2>/dev/null | jaq '.[]?.id?')
+    
+    local active_id
+    active_id=$(hyprctl activeworkspace -j 2>/dev/null | jaq '.id')
+
+    for id in "${occupied_workspaces[@]}"; do
+        if [[ $id != "$active_id" ]]; then
+            eww_update "ws-occupied" "(.[$((id-1))].class|=\$value)"
+        fi
+    done
+}
+
+update_on_start() {
+    local active_id
+    active_id=$(hyprctl activeworkspace -j 2>/dev/null | jaq '.id')
+    
+    eww_update "ws-active" "(.[$((active_id-1))].class|=\$value)"
+    update_occupied_workspaces
+}
+
+handle() {
+    case $1 in
+        workspace*|createworkspace*)
+            local new_active old_active
+            new_active=$(hyprctl activeworkspace -j 2>/dev/null | jaq '.id')
+            old_active=$("$EWW_BIN" get workspaces | jaq 'map(select(.class=="ws-active")) | .[0].index')
+
+            if [[ "$new_active" != "$old_active" ]]; then
+                [[ -n "$old_active" ]] && eww_update "ws-inactive" "(.[$((old_active-1))].class|=\$value)"
+                eww_update "ws-active" "(.[$((new_active-1))].class|=\$value)"
+            fi
+            update_occupied_workspaces
+            ;;
+        destroyworkspace*)
+            local destroyed_id=${1##*>>}
+            eww_update "ws-inactive" "(.[$((destroyed_id-1))].class|=\$value)"
+            ;;
+    esac
+}
+
+# Инициализация при старте
+update_on_start
+
+# Подключение к сокету Hyprland
+SOCK="/tmp/hypr/${HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock"
+if [[ -S "$SOCK" ]]; then
+    socat -U - UNIX-CONNECT:"$SOCK" | while read -r line; do
+        handle "$line"
+    done
+else
+    echo "Hyprland socket не найден: $SOCK" >&2
+fi
+

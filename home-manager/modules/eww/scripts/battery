@@ -1,0 +1,61 @@
+#!/usr/bin/env sh
+
+BAT="/sys/class/power_supply/BAT0"
+PER="$(cat "$BAT/capacity")"
+STATUS="$(cat "$BAT/status")"
+
+icon() {
+    if [ "$STATUS" = "Charging" ]; then
+        echo ""
+        return
+    fi
+
+    if [ "$PER" -ge 100 ]; then
+        ICON=""
+    elif [ "$PER" -ge 90 ]; then
+        ICON=""
+    elif [ "$PER" -ge 80 ]; then
+        ICON=""
+    elif [ "$PER" -ge 70 ]; then
+        ICON=""
+    elif [ "$PER" -ge 60 ]; then
+        ICON=""
+    elif [ "$PER" -ge 50 ]; then
+        ICON=""
+    elif [ "$PER" -ge 40 ]; then
+        ICON=""
+    elif [ "$PER" -ge 30 ]; then
+        ICON=""
+    elif [ "$PER" -ge 20 ]; then
+        ICON=""
+    elif [ "$PER" -ge 10 ]; then
+        ICON=""
+        notify-send -u critical "Battery Low" "Connect Charger"
+    elif [ "$PER" -gt 0 ]; then
+        ICON=""
+        notify-send -u critical "Battery Low" "Connect Charger"
+    else
+        echo ""
+        return
+    fi
+
+    echo "$ICON"
+}
+
+percent() {
+    echo "$PER"
+}
+
+case "$1" in
+    icon)
+        icon
+        ;;
+    percent)
+        percent
+        ;;
+    *)
+        echo "Usage: $0 {icon|percent}"
+        exit 1
+        ;;
+esac
+

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Скрипт для eww: текущее имя Wi-Fi сети
+
+# Расширяем PATH для NixOS
+export PATH=$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH
+
+# Получаем активную Wi-Fi сеть
+SSID=$(nmcli -t -f active,ssid dev wifi 2>/dev/null | grep '^yes' | cut -d: -f2)
+
+# Выводим результат
+if [[ -n "$SSID" ]]; then
+    echo "$SSID"
+else
+    echo "Not connected"
+fi
+

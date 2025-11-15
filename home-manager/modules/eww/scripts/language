@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+import evdev
+import sys
+
+KEYBOARD_NAME = "AT Translated Set 2 keyboard"
+
+try:
+    devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+    keyboard = next(dev for dev in devices if KEYBOARD_NAME.lower() in dev.name.lower())
+
+    layout = "US"
+    Alt_pressed = False
+    Shift_pressed = False
+    print(layout, flush=True)
+
+    for event in keyboard.read_loop():
+        if event.type == evdev.ecodes.EV_KEY:
+            if (
+                event.code == evdev.ecodes.KEY_LEFTALT
+                or event.code == evdev.ecodes.KEY_RIGHTALT
+            ):
+                Alt_pressed = event.value == 1
+
+            elif (
+                event.code == evdev.ecodes.KEY_LEFTSHIFT
+                or event.code == evdev.ecodes.KEY_RIGHTSHIFT
+            ):
+                Shift_pressed = event.value == 1
+
+            if Alt_pressed and Shift_pressed and event.value == 1:
+                if (
+                    event.code == evdev.ecodes.KEY_LEFTALT
+                    or event.code == evdev.ecodes.KEY_RIGHTALT
+                    or event.code == evdev.ecodes.KEY_LEFTSHIFT
+                    or event.code == evdev.ecodes.KEY_RIGHTSHIFT
+                ):
+                    layout = "RU" if layout == "US" else "US"
+                    print(layout, flush=True)
+
+except StopIteration:
+    pass
+except (PermissionError, IOError):
+    pass
+except KeyboardInterrupt:
+    pass

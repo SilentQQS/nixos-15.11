@@ -1,0 +1,7 @@
+(deflisten kb-layout :initial "US" "~/.config/eww/scripts/language")
+
+(defwidget keyboard-layout []
+  (label :text kb-layout
+         :class "kb-layout"
+         "~/.config/eww/scripts/language"))
+

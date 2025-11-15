@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+export PATH=$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH
+
+case "$1" in
+  volume)
+    if command -v pulsemixer >/dev/null 2>&1; then
+      if command -v kitty >/dev/null 2>&1; then
+        kitty -e pulsemixer &
+      else
+        notify-send "kitty не установлен"
+      fi
+    else
+      notify-send "pulsemixer не установлен"
+    fi
+    ;;
+  audio)  # совместимость с bright widget
+    # Заглушка
+    ;;
+  *)
+    echo "Usage: $0 {volume|audio}"
+    exit 1
+    ;;
+esac
+

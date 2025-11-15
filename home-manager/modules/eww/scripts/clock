@@ -1,0 +1,53 @@
+#!/usr/bin/env sh
+
+export PATH=$HOME/.nix-profile/bin:/run/current-system/sw/bin:$PATH
+EWW_BIN="/usr/local/bin/eww"
+LOCK_FILE="$HOME/.cache/eww-calendar.lock"
+
+calendar() {
+    run() {
+        "$EWW_BIN" -c "$HOME/.config/eww/" open calendar
+    }
+
+    # Запускаем eww daemon, если не запущен
+    if ! pidof eww >/dev/null 2>&1; then
+        "$EWW_BIN" daemon
+        sleep 1
+    fi
+
+    # Открываем/закрываем виджет
+    if [ ! -f "$LOCK_FILE" ]; then
+        touch "$LOCK_FILE"
+        run
+    else
+        "$EWW_BIN" -c "$HOME/.config/eww/" close calendar
+        rm "$LOCK_FILE"
+    fi
+}
+
+case "$1" in
+  launcher)
+    [ -x "$HOME/.local/bin/launcher" ] && "$HOME/.local/bin/launcher"
+    ;;
+  wifi)
+    if command -v kitty >/dev/null 2>&1 && command -v nmtui >/dev/null 2>&1; then
+        kitty -e nmtui
+    else
+        notify-send "WiFi tool not available"
+    fi
+    ;;
+  audio|volume)
+    if command -v pulsemixer >/dev/null 2>&1 && command -v kitty >/dev/null 2>&1; then
+        kitty -e pulsemixer &
+    else
+        notify-send "pulsemixer not installed"
+    fi
+    ;;
+  calendar)
+    calendar
+    ;;
+  *)
+    echo "Usage: $0 {launcher|wifi|audio|calendar}"
+    exit 1
+    ;;
+esac

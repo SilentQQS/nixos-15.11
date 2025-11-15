@@ -1,0 +1,252 @@
+
+
+#   ██████╗ ████████╗████████╗███████╗██████╗                         
+#  ██╔═══██╗╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗                        
+#  ██║   ██║   ██║      ██║   █████╗  ██████╔╝█████╗                  
+#  ██║   ██║   ██║      ██║   ██╔══╝  ██╔══██╗╚════╝                  
+#  ╚██████╔╝   ██║      ██║   ███████╗██║  ██║                        
+#   ╚═════╝    ╚═╝      ╚═╝   ╚══════╝╚═╝  ╚═╝                        
+#  ██╗      █████╗ ██╗   ██╗███╗   ██╗ ██████╗██╗  ██╗███████╗██████╗ 
+#  ██║     ██╔══██╗██║   ██║████╗  ██║██╔════╝██║  ██║██╔════╝██╔══██╗
+#  ██║     ███████║██║   ██║██╔██╗ ██║██║     ███████║█████╗  ██████╔╝
+#  ██║     ██╔══██║██║   ██║██║╚██╗██║██║     ██╔══██║██╔══╝  ██╔══██╗
+#  ███████╗██║  ██║╚██████╔╝██║ ╚████║╚██████╗██║  ██║███████╗██║  ██║
+#  ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
+
+# Terminal shell script launcher, written in rust
+# Source Code: https://github.com/kuokuo123/otter-launcher
+
+# Recommended to be used in companion with sway-launcher-desktop to launch desktop applications
+# https://github.com/Biont/sway-launcher-desktop
+
+
+[general]
+default_module = "gg" # module to run when no prefix is matched
+empty_module = "app" # run with an empty prompt
+exec_cmd = "sh -c" # exec command of your shell
+# for example: "bach -c" for bash; "zsh -c" for zsh; also accept wm commands like "hyprctl dispatch exec"
+vi_mode = false # set true to use vi keybinds, false emacs keybinds
+esc_to_abort = true # useful for vi users
+cheatsheet_entry = "?" # when prompted, will show a list of configured modules
+cheatsheet_viewer = "less -R; clear" # command to show cheatsheet; through piping stdout
+clear_screen_after_execution = false
+loop_mode = true # don't quit after executing a module, useful with scratchpads
+external_editor = "hx" # if set, press ctrl+e (or v in vi normal mode) to edit prompt in specified program
+#callback = "" # if set, will run after module execution; for example, calling swaymsg to adjust window size
+
+
+# ANSI color codes are allowed. However, \x1b should be replaced with \u001B, because the rust toml crate cannot read \x as an escaped character
+[interface]
+# use three quotes to write longer commands
+header = """  \u001B[34;1m  >\u001B[0m $USER@$(echo $HOSTNAME)              \u001B[31m\u001B[0m $(cat /proc/loadavg | cut -d ' ' -f 1)  \u001B[33m󰍛\u001B[0m $(free -h | awk 'FNR == 2 {print $3}' | sed 's/i//')\n     \u001B[34;1m>\u001B[0;1m """
+
+header_cmd = "fastfetch -c /home/fotom/.config/fastfetch/otter.jsonc   --key-type icon --logo-type data --logo \"$(krabby name ivysaur --no-title)\""
+header_cmd_trimmed_lines = 1
+
+# move the interface rightward or upward, useful with chafa image
+move_right = 0
+move_up = 0
+
+header_concatenate = false # print header and header_cmd output to the same line, default to false
+list_prefix = "      "
+selection_prefix = "    \u001B[31;1m> "
+place_holder = "type & search"
+default_module_message = "      \u001B[33msearch\u001B[0m the internet" # shown when the default module is in use
+empty_module_message = "" # shown when the empty module is in use
+suggestion_mode = "list" # available options: list, hint
+suggestion_lines = 8 # 0 to disable suggestions and tab completion
+customized_list_order = false # false to list modules alphabetically; true to list as per the configured order in the below [[modules]] section
+indicator_with_arg_module = "\u001B[31m^\u001B[0m " # the sign showing whether a module should run with an argument
+indicator_no_arg_module = "\u001B[31m$\u001B[0m "
+prefix_padding = 3 # format prefixes to have a uniformed width
+# below color options affect all modules; per-module coloring can be configured using ansi codes individually
+prefix_color = "\u001B[33m"
+description_color = "\u001B[39m"
+place_holder_color = "\u001B[30m"
+hint_color = "\u001B[30m" # suggestion color in hint mode
+
+
+# modules are defined as followed
+# otter-launcher runs cmd as a child process. Use "setsid -f" to unbind or fork the launched command, like normal shell scripting. While unbinding is useful for running gui programs, otter-launcher should retain the ability to run text-based programs.
+[[modules]]
+description = "search with google"
+prefix = "gg"
+cmd = "xdg-open https://www.google.com/search?q='{}'" # try wm's exec command for unbinding if 'setsid -f' does not work as expected, eg. 'hyprctl dispatch exec'
+with_argument = true # if true, {} in cmd will be replaced with user input. if not explicitly set, taken as false.
+url_encode = true # should be true when calling webpages; this ensures special characters in url being readable to browsers; taken as false if not explicitly set
+unbind_proc = true # run cmd in a forked shell as opposed to as a child process; useful for launching gui programs; taken as false if not explicitly set
+
+## YOU SHOULD USE otter-appruner.sh
+ 
+# [[modules]]
+# description = "launch desktop app"
+# prefix = "app"
+# cmd = "$HOME/.config/otter-launcher/scripts/launcher-app.sh purge && $HOME/.config/otter-launcher/scripts/launcher-app.sh"
+
+
+[[modules]]
+description = "power menu with fzf"
+prefix = "po"
+cmd = """
+function power {
+if [[ -n $1 ]]; then
+case $1 in
+"lock") $TERMINAL -H -e swaylock ;;
+"logout") session=`loginctl session-status | head -n 1 | awk '{print $1}'`; loginctl terminate-session $session ;;
+"suspend") systemctl suspend ;;
+"hibernate") systemctl hibernate ;;
+"reboot") systemctl reboot ;;
+"shutdown") systemctl poweroff ;;
+esac fi }
+power $(echo -e 'lock\nlogout\nshutdown\nreboot\nsuspend\nhibernate' | fzf --reverse --no-scrollbar --padding 1,3 --prompt 'Power Menu: ' | tail -1)
+"""
+
+[[modules]]
+description = "power profile with fzf"
+prefix = "pp"
+cmd = """
+function power {
+if [[ -n $1 ]]; then
+case $1 in
+"performance") powerprofilesctl set performance ;;
+"balanced") powerprofilesctl set balanced ;;
+"power-saver") powerprofilesctl set power-saver ;;
+esac fi }
+
+current=$(powerprofilesctl get)
+choices=$(powerprofilesctl list | grep -E '^(\\s*performance|\\s*balanced|\\s*power-saver)' | sed 's/://g' | sed 's/^[[:space:]]*//')
+selection=$(echo -e "$choices" | fzf --reverse --no-scrollbar --padding 1,3 --prompt "Power Profile (current: $current): " | awk '{print $1}')
+power "$selection"
+"""
+
+[[modules]]
+description = "run command in terminal"
+prefix = "sh"
+cmd = """
+$(printf $TERMINAL | sed 's/xterm-//g') -e fish -c "{}; exec fish"
+"""
+with_argument = true
+unbind_proc = true
+
+[[modules]]
+description = "search archwiki"
+prefix = "aw"
+cmd = "xdg-open https://wiki.archlinux.org/index.php?search='{}'"
+with_argument = true
+url_encode = true
+unbind_proc = true
+
+[[modules]]
+description = "search nixpkgs"
+prefix = "nix"
+cmd = "xdg-open https://search.nixos.org/packages?channel=unstable&q='{}'"
+with_argument = true
+url_encode = true
+unbind_proc = true
+
+[[modules]]
+description = "impala"
+prefix = "im"
+# cmd = "setsid -f $TERMINAL -e sh -c 'sleep 0.1 && nmtui'"
+cmd = """
+hyprctl dispatch resizeactive 400 460 && hyprctl dispatch centerwindow 1
+impala
+hyprctl dispatch resizeactive -400 -460 && hyprctl dispatch centerwindow 1
+"""
+
+[[modules]]
+description = "rescan wifi"
+prefix = "resc"
+cmd = "nmcli device wifi rescan"
+
+[[modules]]
+description = "switch wifi connection"
+prefix = "wifi"
+cmd = """
+selected=$(echo -e "$(nmcli -f ssid device wifi list | awk '{print $1}' | grep -v SSID)" | fzf --reverse --padding 1,3 --prompt 'Available Networks: ')
+ 
+if [ "$(nmcli connection show --active | rg "$selected")" ]
+  then
+    nmcli connection down "$selected"
+  else
+    nmcli connection up "$selected"
+fi
+"""
+
+[[modules]]
+description = "connect/disconnect warp vpn"
+prefix = "vpn"
+cmd = """
+selected=$(printf 'warpon\nwarpoff' | fzf --reverse --padding 1,3 --prompt 'VPN: ')
+if [ -n \"$selected\" ]; then
+  case \"$selected\" in
+    warpon)
+      echo "Running: doas wg-quick up ~/.config/wgcf/wgcf-profile.conf"
+      sh -c "doas wg-quick up ~/.config/wgcf/wgcf-profile.conf"
+      ;;
+    warpoff)
+      echo "Running: doas wg-quick down ~/.config/wgcf/wgcf-profile.conf"
+      sh -c "doas wg-quick down ~/.config/wgcf/wgcf-profile.conf"
+      ;;
+  esac
+fi
+"""
+
+[[modules]]
+description = "bluetui"
+prefix = "bl"
+cmd = """
+hyprctl dispatch resizeactive 600 360 && hyprctl dispatch centerwindow 1
+bluetui
+hyprctl dispatch resizeactive -600 -360 && hyprctl dispatch centerwindow 1
+"""
+
+[[modules]]
+description = "set charge limit"
+prefix = "chg"
+cmd = "notify-send 'Charge limit' 'Will set to {}%'; echo '{}' | doas tee /sys/class/power_supply/BAT0/charge_control_end_threshold > /dev/null; notify-send 'Charge limit' 'Set to {}%'"
+with_argument = true
+
+[[modules]]
+description = "audio mixer"
+prefix = "pm"
+cmd = """
+hyprctl dispatch resizeactive 600 360 && hyprctl dispatch centerwindow 1
+pulsemixer
+hyprctl dispatch resizeactive -600 -360 && hyprctl dispatch centerwindow 1
+"""
+
+[[modules]]
+description = "mute default micro"
+prefix = "m"
+cmd = """
+wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+"""
+
+[[modules]]
+description = "open files with fzf"
+prefix = "fo"
+cmd = "fd --type f | fzf --with-nth -1 --reverse --padding 1,3 --prompt 'Open Files: ' | setsid -f xargs -r -I [] xdg-open '[]'"
+
+[[modules]]
+description = "open folders with fzf"
+prefix = "yz"
+cmd = """
+fd --type d | fzf --with-nth -1 --reverse --padding 1,3 --prompt 'Open Folders: ' | xargs -r -I [] setsid -f "$(echo $TERMINAL | sed 's/xterm-//g')" -e yazi '[]'
+"""
+
+[[modules]]
+description = "search youtube"
+prefix = "yt"
+cmd = "setsid -f xdg-open 'https://www.youtube.com/results?search_query={}'"
+with_argument = true
+url_encode = true
+unbind_proc = true
+
+[[modules]]
+description = "search google map"
+prefix = "gm"
+cmd = "setsid -f xdg-open 'https://www.google.com/maps/search/{}'"
+with_argument = true
+url_encode = true
+unbind_proc = true
